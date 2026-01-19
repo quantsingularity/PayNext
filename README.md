@@ -23,6 +23,7 @@ PayNext is a robust, scalable payment processing platform built on a **microserv
 ## Table of Contents
 
 - [Overview](#overview)
+- [Project Structure](#project-structure)
 - [Key Features](#key-features)
 - [Architecture](#architecture)
 - [Technology Stack](#technology-stack)
