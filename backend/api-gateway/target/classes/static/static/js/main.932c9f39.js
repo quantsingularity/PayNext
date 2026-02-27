@@ -320,7 +320,6 @@
                 f = f.concat(u),
                 l = Promise.resolve(t);
               f.length;
-
             )
               l = l.then(f.shift(), f.shift());
             return l;
@@ -1564,7 +1563,6 @@
                   o = a.length - 1,
                   i = l.length - 1;
                 1 <= o && 0 <= i && a[o] !== l[i];
-
               )
                 i--;
               for (; 1 <= o && 0 <= i; o--, i--)
@@ -1957,7 +1955,6 @@
                     "<svg>" + t.valueOf().toString() + "</svg>",
                     t = se.firstChild;
                   e.firstChild;
-
                 )
                   e.removeChild(e.firstChild);
                 for (; t.firstChild; ) e.appendChild(t.firstChild);
@@ -4277,7 +4274,6 @@
           for (
             e = e.return;
             null !== e && 5 !== e.tag && 3 !== e.tag && 13 !== e.tag;
-
           )
             e = e.return;
           nl = e;
@@ -6444,7 +6440,6 @@
             for (
               n = zs((e = t.child), e.pendingProps), t.child = n, n.return = t;
               null !== e.sibling;
-
             )
               ((e = e.sibling),
                 ((n = n.sibling = zs(e, e.pendingProps)).return = t));
@@ -6835,7 +6830,6 @@
                             r = n,
                             n = t.child;
                           null !== n;
-
                         )
                           ((e = r),
                             ((o = n).flags &= 14680066),
@@ -7165,7 +7159,6 @@
             for (
               e.sibling.return = e.return, e = e.sibling;
               5 !== e.tag && 6 !== e.tag && 18 !== e.tag;
-
             ) {
               if (2 & e.flags) continue e;
               if (null === e.child || 4 === e.tag) continue e;
@@ -7875,7 +7868,6 @@
                 a = e.expirationTimes,
                 l = e.pendingLanes;
               0 < l;
-
             ) {
               var o = 31 - ot(l),
                 i = 1 << o,
@@ -7938,7 +7930,6 @@
               (Ru === e && Tu === t) ||
               ((Wu = null), ($u = Xe() + 500), ds(e, t));
               ;
-
             )
               try {
                 ys();
@@ -8075,7 +8066,6 @@
               e.pingedLanes &= ~t,
               e = e.expirationTimes;
             0 < t;
-
           ) {
             var n = 31 - ot(t),
               r = 1 << n;
@@ -8450,7 +8440,6 @@
                                     3 === d.nodeType &&
                                       (i += d.nodeValue.length),
                                     null !== (h = d.firstChild);
-
                                 )
                                   ((p = d), (d = h));
                                 for (;;) {
@@ -8478,7 +8467,6 @@
                           Vt = !1,
                           Gi = t;
                         null !== Gi;
-
                       )
                         if (
                           ((e = (t = Gi).child),
@@ -9229,7 +9217,6 @@
                       n = Sl(t, null, r, n),
                       t.child = n;
                     n;
-
                   )
                     ((n.flags = (-3 & n.flags) | 4096), (n = n.sibling));
                 } else {
@@ -9299,7 +9286,6 @@
                     for (
                       null !== (o = t.child) && (o.return = t);
                       null !== o;
-
                     ) {
                       var u = o.dependencies;
                       if (null !== u) {
@@ -10280,7 +10266,6 @@
             for (
               w(n), d = r(s);
               null !== d && (!(d.expirationTime > n) || (e && !R()));
-
             ) {
               var o = d.callback;
               if ("function" === typeof o) {
