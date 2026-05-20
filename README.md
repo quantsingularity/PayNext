@@ -55,8 +55,7 @@ PayNext/
 ├── web-frontend/           # Web dashboard
 ├── scripts/                # Automation, setup, and utility scripts
 ├── LICENSE                 # License information
-├── README.md               # Project overview and instructions
-└── tools/                  # Formatter configs, linting tools, and dev utilities
+└── README.md               # Project overview and instructions
 ```
 
 ## Key Features
