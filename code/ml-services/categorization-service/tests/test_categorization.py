@@ -7,7 +7,8 @@ import unittest
 import pandas as pd
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from transaction_categorization_data_generator import generate_categorization_data
+from transaction_categorization_data_generator import \
+    generate_categorization_data
 
 
 class TestGenerateCategorizationData(unittest.TestCase):

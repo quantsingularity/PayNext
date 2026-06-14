@@ -1,6 +1,6 @@
 ---
 - name: Create payment-service directory
-  file:
+  ansible.builtin.file:
     path: "/opt/paynext/payment-service"
     state: directory
     mode: "0755"
@@ -8,15 +8,15 @@
     group: root
 
 - name: Ensure required packages are installed
-  apt:
+  ansible.builtin.apt:
     name:
       - openjdk-17-jdk
       - unzip
     state: present
-    update_cache: yes
+    update_cache: true
 
 - name: Configure Payment Service environment variables
-  template:
+  ansible.builtin.template:
     src: payment-service.env.j2
     dest: /etc/payment-service.env
     mode: "0640"
@@ -25,7 +25,7 @@
   notify: Restart Payment Service
 
 - name: Create Payment Service systemd service file
-  template:
+  ansible.builtin.template:
     src: payment-service.service.j2
     dest: /etc/systemd/system/payment-service.service
     mode: "0644"
@@ -34,8 +34,8 @@
     - Restart Payment Service
 
 - name: Reload systemd and enable payment-service
-  systemd:
+  ansible.builtin.systemd:
     name: payment-service
-    daemon_reload: yes
-    enabled: yes
+    daemon_reload: true
+    enabled: true
     state: started

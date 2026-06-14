@@ -34,6 +34,7 @@
         <spring.cloud.version>2023.0.0</spring.cloud.version>
         <version.spotless-plugin>2.30.0</version.spotless-plugin>
         <jjwt.version>0.11.5</jjwt.version>
+        <springdoc.version>2.5.0</springdoc.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
@@ -90,6 +91,7 @@
                     <version>${spring.boot.version}</version>
                     <executions>
                         <execution>
+                            <id>repackage</id>
                             <goals>
                                 <goal>repackage</goal>
                             </goals>

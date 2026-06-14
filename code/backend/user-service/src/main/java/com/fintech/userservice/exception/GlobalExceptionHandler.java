@@ -58,7 +58,7 @@ public class GlobalExceptionHandler {
         "timestamp", LocalDateTime.now().toString(),
         "status", status.value(),
         "error", status.getReasonPhrase(),
-        "message", message,
+        "message", message != null ? message : status.getReasonPhrase(),
         "path", request.getDescription(false).replace("uri=", ""));
   }
 }

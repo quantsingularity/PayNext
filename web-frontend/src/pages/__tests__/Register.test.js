@@ -24,7 +24,7 @@ describe("Register Page", () => {
     expect(screen.getByLabelText(/Username/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/Email Address/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/^Password/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/Confirm Password/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/^Confirm Password/i)).toBeInTheDocument();
   });
 
   test("shows stepper with 3 steps", () => {
@@ -55,7 +55,7 @@ describe("Register Page", () => {
     fireEvent.change(screen.getByLabelText(/^Password/i), {
       target: { value: "password123" },
     });
-    fireEvent.change(screen.getByLabelText(/Confirm Password/i), {
+    fireEvent.change(screen.getByLabelText(/^Confirm Password/i), {
       target: { value: "differentpass" },
     });
     fireEvent.click(screen.getByRole("button", { name: /Next/i }));
@@ -75,7 +75,7 @@ describe("Register Page", () => {
     fireEvent.change(screen.getByLabelText(/^Password/i), {
       target: { value: "short" },
     });
-    fireEvent.change(screen.getByLabelText(/Confirm Password/i), {
+    fireEvent.change(screen.getByLabelText(/^Confirm Password/i), {
       target: { value: "short" },
     });
     fireEvent.click(screen.getByRole("button", { name: /Next/i }));

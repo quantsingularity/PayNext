@@ -187,7 +187,8 @@ mysql_migrate() {
 
     # Run each migration file
     for file in "${migration_files[@]}"; do
-        local filename=$(basename "$file")
+        local filename
+        filename=$(basename "$file")
         info "Running migration: $filename"
         execute "mysql -h localhost -P ${MYSQL_PORT} -u ${MYSQL_USER} -p${MYSQL_PASSWORD} ${MYSQL_DATABASE} < \"$file\"" "Migration $filename completed" true
     done
@@ -230,7 +231,8 @@ mysql_backup() {
     mkdir -p "$backup_dir"
 
     # Generate backup filename with timestamp
-    local timestamp=$(date +"%Y%m%d_%H%M%S")
+    local timestamp
+    timestamp=$(date +"%Y%m%d_%H%M%S")
     local backup_file="$backup_dir/${MYSQL_DATABASE}_${timestamp}.sql"
 
     info "Backing up database ${MYSQL_DATABASE} to $backup_file..."
@@ -381,7 +383,8 @@ mongodb_backup() {
     mkdir -p "$backup_dir"
 
     # Generate backup filename with timestamp
-    local timestamp=$(date +"%Y%m%d_%H%M%S")
+    local timestamp
+    timestamp=$(date +"%Y%m%d_%H%M%S")
     local backup_file="$backup_dir/${MYSQL_DATABASE}_${timestamp}"
 
     info "Backing up database ${MYSQL_DATABASE} to $backup_file..."
@@ -418,7 +421,8 @@ mongodb_restore() {
 
     # Check if the file is compressed
     if [[ "$backup_file" == *.tar.gz ]]; then
-        local temp_dir="/tmp/mongodb_restore_$(date +%s)"
+        local temp_dir
+        temp_dir="/tmp/mongodb_restore_$(date +%s)"
         mkdir -p "$temp_dir"
 
         info "Extracting backup..."

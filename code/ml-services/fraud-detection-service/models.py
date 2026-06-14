@@ -7,17 +7,8 @@ so the Python service owns the same schema that was previously managed by Spring
 import enum
 from datetime import datetime, timezone
 
-from sqlalchemy import (
-    JSON,
-    BigInteger,
-    Column,
-    DateTime,
-    Enum,
-    Float,
-    Integer,
-    String,
-    Text,
-)
+from sqlalchemy import (JSON, BigInteger, Column, DateTime, Enum, Float,
+                        Integer, String, Text)
 from sqlalchemy.orm import DeclarativeBase
 
 

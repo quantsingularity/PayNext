@@ -1,7 +1,2 @@
 ---
-motd_message: "Welcome to the PayNext Project!"
-packages:
-  - git
-  - curl
-  - vim
-  - htop
+# Role variables for common are defined in defaults/main.yml.

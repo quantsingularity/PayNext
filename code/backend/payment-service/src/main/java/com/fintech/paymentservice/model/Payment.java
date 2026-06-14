@@ -24,6 +24,12 @@ public class Payment {
   @Column(nullable = false)
   private String status;
 
+  @Column private String recipient;
+
+  @Column private String description;
+
+  @Column private String type;
+
   public Payment() {}
 
   public Payment(Long userId, BigDecimal amount, LocalDateTime paymentDate, String status) {
@@ -71,6 +77,30 @@ public class Payment {
 
   public void setStatus(String status) {
     this.status = status;
+  }
+
+  public String getRecipient() {
+    return recipient;
+  }
+
+  public void setRecipient(String recipient) {
+    this.recipient = recipient;
+  }
+
+  public String getDescription() {
+    return description;
+  }
+
+  public void setDescription(String description) {
+    this.description = description;
+  }
+
+  public String getType() {
+    return type;
+  }
+
+  public void setType(String type) {
+    this.type = type;
   }
 
   @Override

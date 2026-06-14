@@ -19,7 +19,7 @@ describe("AuthService", () => {
   });
 
   describe("login", () => {
-    it("should call the login API endpoint with correct credentials", async () => {
+    it("should call the login API with correct credentials", async () => {
       const username = "testuser";
       const password = "password123";
       const mockResponse = {
@@ -70,7 +70,7 @@ describe("AuthService", () => {
   });
 
   describe("register", () => {
-    it("should call the register API endpoint with correct user data", async () => {
+    it("should call the register API with correct user data", async () => {
       const username = "newuser";
       const email = "new@example.com";
       const password = "password123";

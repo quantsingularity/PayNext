@@ -176,7 +176,6 @@ export default function RegisterScreen() {
           >
             {fields.map((f) => {
               const isPassword = f.name === "password";
-              const isConfirm = f.name === "confirmPassword";
               const showPwd = isPassword ? showPassword : showConfirm;
               return (
                 <View key={f.name} style={styles.field}>

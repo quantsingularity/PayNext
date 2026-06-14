@@ -11,7 +11,6 @@
 GREEN='\033[0;32m'
 BLUE='\033[0;34m'
 RED='\033[0;31m'
-YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
 # --------------------
@@ -35,8 +34,7 @@ error() {
 
 # Execute a command and handle errors
 execute() {
-    eval "$1" > /dev/null 2>&1
-    if [ $? -ne 0 ]; then
+    if ! eval "$1" > /dev/null 2>&1; then
         error "$2"
         exit 1
     fi

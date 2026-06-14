@@ -114,12 +114,14 @@ detect_os() {
 check_prerequisites() {
     section "Checking Prerequisites"
 
-    local os=$(detect_os)
+    local os
+    os=$(detect_os)
     info "Detected operating system: $os"
 
     # Check Java
     if command_exists java; then
-        local java_version=$(java -version 2>&1 | head -1 | cut -d'"' -f2 | sed 's/^1\.//' | cut -d'.' -f1)
+        local java_version
+        java_version=$(java -version 2>&1 | head -1 | cut -d'"' -f2 | sed 's/^1\.//' | cut -d'.' -f1)
         if [[ "$java_version" -ge 17 ]]; then
             success "Java $java_version is installed"
         else
@@ -132,7 +134,8 @@ check_prerequisites() {
 
     # Check Maven
     if command_exists mvn; then
-        local mvn_version=$(mvn --version | head -1 | awk '{print $3}')
+        local mvn_version
+        mvn_version=$(mvn --version | head -1 | awk '{print $3}')
         success "Maven $mvn_version is installed"
     else
         error "Maven is not installed. Please install Maven"
@@ -141,7 +144,8 @@ check_prerequisites() {
 
     # Check Node.js
     if command_exists node; then
-        local node_version=$(node --version | cut -d'v' -f2)
+        local node_version
+        node_version=$(node --version | cut -d'v' -f2)
         success "Node.js $node_version is installed"
     else
         error "Node.js is not installed. Please install Node.js"
@@ -150,7 +154,8 @@ check_prerequisites() {
 
     # Check npm
     if command_exists npm; then
-        local npm_version=$(npm --version)
+        local npm_version
+        npm_version=$(npm --version)
         success "npm $npm_version is installed"
     else
         error "npm is not installed. Please install npm"
@@ -159,7 +164,8 @@ check_prerequisites() {
 
     # Check Docker
     if command_exists docker; then
-        local docker_version=$(docker --version | awk '{print $3}' | sed 's/,//')
+        local docker_version
+        docker_version=$(docker --version | awk '{print $3}' | sed 's/,//')
         success "Docker $docker_version is installed"
     else
         error "Docker is not installed. Please install Docker"
@@ -168,7 +174,8 @@ check_prerequisites() {
 
     # Check Docker Compose
     if command_exists docker-compose; then
-        local compose_version=$(docker-compose --version | awk '{print $3}' | sed 's/,//')
+        local compose_version
+        compose_version=$(docker-compose --version | awk '{print $3}' | sed 's/,//')
         success "Docker Compose $compose_version is installed"
     else
         error "Docker Compose is not installed. Please install Docker Compose"
@@ -177,7 +184,8 @@ check_prerequisites() {
 
     # Check kubectl (optional)
     if command_exists kubectl; then
-        local kubectl_version=$(kubectl version --client --short | awk '{print $3}')
+        local kubectl_version
+        kubectl_version=$(kubectl version --client --short | awk '{print $3}')
         success "kubectl $kubectl_version is installed"
     else
         warning "kubectl is not installed. It's optional but recommended for Kubernetes deployments"
@@ -590,9 +598,12 @@ main() {
     # Calculate and display elapsed time
     local end_time
     end_time=$(date +%s)
-    local elapsed_time=$((end_time - start_time))
-    local minutes=$((elapsed_time / 60))
-    local seconds=$((elapsed_time % 60))
+    local elapsed_time
+    elapsed_time=$((end_time - start_time))
+    local minutes
+    minutes=$((elapsed_time / 60))
+    local seconds
+    seconds=$((elapsed_time % 60))
 
     echo -e "\n${BLUE}Setup completed in ${minutes} minutes and ${seconds} seconds.${NC}"
 }

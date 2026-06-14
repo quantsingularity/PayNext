@@ -645,3 +645,57 @@ Community SDKs:
 - [Usage Guide](USAGE.md) - Common usage patterns
 - [Examples](examples/) - Working code examples
 - [Configuration](CONFIGURATION.md) - API configuration options
+
+---
+
+# Current Implemented Contract (Authoritative)
+
+This section reflects the endpoints as actually implemented in the backend, including
+the additions from the endpoint-implementation pass. Where it differs from older
+sections above, this section is authoritative. Interactive Swagger UI is available per
+service at `/swagger-ui.html` (`/v3/api-docs` for the raw OpenAPI JSON).
+
+All client traffic uses the `/api` prefix at the gateway, which strips `/api` and routes
+`/api/users/**` to user-service, `/api/payments/**` to payment-service, and
+`/api/notifications/**` to notification-service. Protected endpoints require
+`Authorization: Bearer <token>` from `POST /api/users/login`. The token carries a
+`userId` claim that payment-service uses to scope data to the caller.
+
+## User service
+
+- `POST /api/users/register` (public): `{username, email, password}` to
+  201 `{id, username, name, email, role}`.
+- `POST /api/users/login` (public): `{username, password}` to
+  200 `{token, user: {id, username, name, email, role}}`.
+- `GET /api/users/me` (auth): 200 `{id, username, name, email, role}`.
+- `GET /api/users/profile` (auth): 200 merged profile with both web fields
+  (`firstName`, `lastName`, `phoneNumber`, `address`, `city`, `postalCode`, `country`)
+  and mobile aliases (`name`, `phone`).
+- `PUT /api/users/profile` (auth): accepts any subset of `name` (split into first/last)
+  or `firstName`/`lastName`, `email`, `phone` or `phoneNumber`, `address`, `city`,
+  `postalCode`, `country`. Returns the updated profile.
+- `GET /api/users/{id}` (auth): 200 `{id, username, name, email, role}` or 404.
+
+## Payment service
+
+A payment is `{id, userId, amount, paymentDate, status, recipient, description, type}`.
+
+- `POST /api/payments` (auth): `{amount, recipient?, description?, type?}` to 201 payment.
+- `GET /api/payments` (auth): array of the caller's payments.
+- `GET /api/payments/{id}` (auth): a payment by numeric id, or 404.
+- `GET /api/payments/balance` (auth): 200 `{balance, currency}`.
+- `GET /api/payments/methods` (auth): array of
+  `{id, userId, type, provider, last4, label, default, createdAt}`.
+- `POST /api/payments/methods` (auth): `{type, provider, last4?, label?}` to 201 method.
+- `POST /api/payments/requests` (auth): `{amount, description?}` to 201
+  `{id, userId, amount, description, status, createdAt}`.
+
+## Notification service
+
+- `POST /api/notifications/send`: `{to, message, subject?}`. Used service to service
+  after a payment is processed.
+
+## Status codes
+
+200 success, 201 created, 400 validation error (`{error}`), 401 missing or invalid
+token, 404 not found.

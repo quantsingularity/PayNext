@@ -1,12 +1,10 @@
 import logging
 import os
-import sys
 
 _SERVICE_DIR = os.path.dirname(os.path.abspath(__file__))
 _ML_COMMON = os.path.join(_SERVICE_DIR, "..", "ml-common", "synthetic_transactions.csv")
 
 import joblib
-import numpy as np
 import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import classification_report, roc_auc_score
@@ -92,7 +90,9 @@ def train_credit_scoring_model(data_path: str = _ML_COMMON):
     logger.info(f"ROC AUC Score: {roc_auc_score(y_test, y_proba):.4f}")
 
     joblib.dump(model, os.path.join(_SERVICE_DIR, "credit_scoring_model.joblib"))
-    joblib.dump(feature_cols, os.path.join(_SERVICE_DIR, "credit_scoring_features.joblib"))
+    joblib.dump(
+        feature_cols, os.path.join(_SERVICE_DIR, "credit_scoring_features.joblib")
+    )
     logger.info("Credit scoring model, scaler, and features saved successfully.")
 
 

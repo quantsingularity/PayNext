@@ -1,7 +1,7 @@
 ---
 - name: Deploy PayNext Application
   hosts: all
-  become: yes
+  become: true
   vars:
     deploy_dir: "/opt/paynext"
     compose_file: "{{ deploy_dir }}/docker-compose.yml"
@@ -11,7 +11,7 @@
   tasks:
     - name: Update apt cache
       apt:
-        update_cache: yes
+        update_cache: true
         cache_valid_time: 3600
 
     - name: Install required packages
@@ -26,7 +26,7 @@
       apt:
         name: docker-compose-v2
         state: present
-      ignore_errors: yes
+      ignore_errors: true
 
     - name: Ensure Docker service is running and enabled
       service:
@@ -60,7 +60,7 @@
       uri:
         url: "{{ health_check_url }}"
         method: GET
-        return_content: yes
+        return_content: true
         status_code: 200
       register: health_result
       retries: "{{ health_check_retries }}"

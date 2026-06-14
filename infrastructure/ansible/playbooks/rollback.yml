@@ -1,7 +1,7 @@
 ---
 - name: Rollback PayNext Application
   hosts: all
-  become: yes
+  become: true
   vars:
     docker_compose_path: "/opt/paynext/docker-compose.yml"
     health_check_url: "http://localhost:8002/actuator/health"
@@ -10,13 +10,13 @@
       community.docker.docker_compose_v2:
         project_src: /opt/paynext
         state: absent
-      ignore_errors: yes
+      ignore_errors: true
 
     - name: Remove PayNext Docker images
       community.docker.docker_image:
         name: "{{ item }}"
         state: absent
-        force_absent: yes
+        force_absent: true
       loop:
         - "quantsingularity/backend-api-gateway"
         - "quantsingularity/backend-eureka-server"
@@ -24,11 +24,11 @@
         - "quantsingularity/backend-payment-service"
         - "quantsingularity/backend-notification-service"
         - "quantsingularity/frontend-fintech-payment"
-      ignore_errors: yes
+      ignore_errors: true
 
     - name: Clean up unused Docker resources
       command: docker system prune -f
-      ignore_errors: yes
+      ignore_errors: true
 
     - name: Verify services are down
       uri:
@@ -36,7 +36,7 @@
         method: GET
         status_code: [200, 404, 503]
       register: health_result
-      ignore_errors: yes
+      ignore_errors: true
 
     - name: Confirm rollback completed
       debug:

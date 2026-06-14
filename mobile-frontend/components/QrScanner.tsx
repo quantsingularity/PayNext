@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   View,
   Text,
@@ -28,6 +28,11 @@ export default function QrScannerScreen({
   const [scanned, setScanned] = useState(false);
   const [torchOn, setTorchOn] = useState(false);
 
+  // Keep the latest onClose in a ref so the mount-only permission effect does not
+  // need it as a dependency (which would re-run the permission request).
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
+
   useEffect(() => {
     (async () => {
       const { status } = await Camera.requestCameraPermissionsAsync();
@@ -36,7 +41,7 @@ export default function QrScannerScreen({
         Alert.alert(
           "Camera Permission Required",
           "PayNext needs camera access to scan QR codes. Please enable it in your device settings.",
-          [{ text: "OK", onPress: onClose }],
+          [{ text: "OK", onPress: () => onCloseRef.current() }],
         );
       }
     })();
@@ -59,7 +64,7 @@ export default function QrScannerScreen({
   if (hasPermission === false) {
     return (
       <SafeAreaView style={styles.centered}>
-        <Ionicons name="camera-off-outline" size={48} color="#64748b" />
+        <Ionicons name="camera-outline" size={48} color="#64748b" />
         <Text style={styles.permTitle}>Camera Access Denied</Text>
         <Text style={styles.permText}>
           Enable camera in Settings to scan QR codes.

@@ -1,6 +1,6 @@
 ---
 - name: Create notification-service directory
-  file:
+  ansible.builtin.file:
     path: "/opt/paynext/notification-service"
     state: directory
     mode: "0755"
@@ -8,15 +8,15 @@
     group: root
 
 - name: Ensure required packages are installed
-  apt:
+  ansible.builtin.apt:
     name:
       - openjdk-17-jdk
       - unzip
     state: present
-    update_cache: yes
+    update_cache: true
 
 - name: Configure Notification Service environment variables
-  template:
+  ansible.builtin.template:
     src: notification-service.env.j2
     dest: /etc/notification-service.env
     mode: "0640"
@@ -25,7 +25,7 @@
   notify: Restart Notification Service
 
 - name: Create Notification Service systemd service file
-  template:
+  ansible.builtin.template:
     src: notification-service.service.j2
     dest: /etc/systemd/system/notification-service.service
     mode: "0644"
@@ -34,8 +34,8 @@
     - Restart Notification Service
 
 - name: Reload systemd and enable notification-service
-  systemd:
+  ansible.builtin.systemd:
     name: notification-service
-    daemon_reload: yes
-    enabled: yes
+    daemon_reload: true
+    enabled: true
     state: started

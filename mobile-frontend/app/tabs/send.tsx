@@ -79,7 +79,7 @@ export default function SendScreen() {
       if (!isNaN(n) && n > 0) setValue("amount", n);
     }
     if (params.memo) setValue("memo", decodeURIComponent(params.memo));
-  }, [params.recipient, params.amount, params.memo]);
+  }, [params.recipient, params.amount, params.memo, setValue]);
 
   const onSubmit = async (data: FormData) => {
     setIsSubmitting(true);

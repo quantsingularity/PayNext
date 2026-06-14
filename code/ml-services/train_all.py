@@ -18,12 +18,24 @@ BASE = os.path.dirname(os.path.abspath(__file__))
 
 # (display_name, directory, training_script)
 SERVICES = [
-    ("fraud-detection-service",   "fraud-detection-service",   "fraud_detection_model.py"),
-    ("anomaly-detection-service", "anomaly-detection-service", "anomaly_detection_model.py"),
-    ("churn-prediction-service",  "churn-prediction-service",  "churn_prediction_model.py"),
-    ("recommendation-service",    "recommendation-service",    "recommendation_model.py"),
-    ("categorization-service",    "categorization-service",    "transaction_categorization_model.py"),
-    ("credit-scoring-service",    "credit-scoring-service",    "credit_scoring_model.py"),
+    ("fraud-detection-service", "fraud-detection-service", "fraud_detection_model.py"),
+    (
+        "anomaly-detection-service",
+        "anomaly-detection-service",
+        "anomaly_detection_model.py",
+    ),
+    (
+        "churn-prediction-service",
+        "churn-prediction-service",
+        "churn_prediction_model.py",
+    ),
+    ("recommendation-service", "recommendation-service", "recommendation_model.py"),
+    (
+        "categorization-service",
+        "categorization-service",
+        "transaction_categorization_model.py",
+    ),
+    ("credit-scoring-service", "credit-scoring-service", "credit_scoring_model.py"),
 ]
 
 errors = []

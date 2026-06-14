@@ -1,8 +1,14 @@
 package com.fintech.paymentservice.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class UserDTO {
+  @JsonProperty("id")
   private Long userId;
+
+  @JsonProperty("username")
   private String userName;
+
   private String email;
 
   // Constructors

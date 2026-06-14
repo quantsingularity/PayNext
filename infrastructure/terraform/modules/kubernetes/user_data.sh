@@ -231,6 +231,7 @@ cat > /etc/docker/daemon.json << 'EOF'
 EOF
 
 # Bootstrap the EKS node
+# shellcheck disable=SC2154  # cluster_name and bootstrap_arguments are injected by Terraform templatefile()
 /etc/eks/bootstrap.sh ${cluster_name} ${bootstrap_arguments}
 
 # Install kubectl for troubleshooting

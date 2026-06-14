@@ -81,7 +81,7 @@ export const userService = {
   },
 
   getTransactionHistory: async (params) => {
-    const response = await api.get("/users/transactions", { params });
+    const response = await api.get("/payments", { params });
     return response.data;
   },
 };

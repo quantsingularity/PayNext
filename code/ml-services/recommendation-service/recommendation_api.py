@@ -126,7 +126,10 @@ async def get_recommendations(user_input: UserRecommendationInput):
 
     user_num_transactions = user_metrics.get("num_transactions", 0)
     cluster_avg_num_transactions = cluster_avg.get("num_transactions", 0)
-    if cluster_avg_num_transactions > 0 and user_num_transactions < cluster_avg_num_transactions * 0.7:
+    if (
+        cluster_avg_num_transactions > 0
+        and user_num_transactions < cluster_avg_num_transactions * 0.7
+    ):
         recommendations.append(
             "You make fewer transactions than your peers. Are you taking full advantage of our payment features?"
         )

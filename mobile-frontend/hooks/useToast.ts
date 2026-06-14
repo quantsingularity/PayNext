@@ -8,9 +8,10 @@ import { Alert } from "react-native";
 export function useToast() {
   const toast = {
     success: (message: string) => {
-      // On native, brief success messages are usually shown inline.
-      // For a richer experience, integrate a library like react-native-toast-message.
-      console.log("[Toast SUCCESS]", message);
+      // On native, brief success messages are usually shown inline. For a richer
+      // experience, integrate a library like react-native-toast-message. Errors and
+      // info use Alert below; success is intentionally a no-op placeholder.
+      void message;
     },
     error: (message: string) => {
       Alert.alert("Error", message);

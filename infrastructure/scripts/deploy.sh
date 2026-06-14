@@ -160,7 +160,8 @@ run_terraform_plan() {
 
     cd "$TERRAFORM_DIR"
 
-    local plan_file="tfplan-$ENVIRONMENT-$(date +%Y%m%d-%H%M%S)"
+    local plan_file
+    plan_file="tfplan-$ENVIRONMENT-$(date +%Y%m%d-%H%M%S)"
 
     terraform plan \
         -var="environment=$ENVIRONMENT" \

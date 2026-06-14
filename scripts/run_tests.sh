@@ -125,12 +125,14 @@ TEST_TYPES=(
 check_prerequisites() {
     section "Checking Prerequisites"
 
-    local os=$(detect_os)
+    local os
+    os=$(detect_os)
     info "Detected operating system: $os"
 
     # Check Java
     if command_exists java; then
-        local java_version=$(java -version 2>&1 | head -1 | cut -d'"' -f2 | sed 's/^1\.//' | cut -d'.' -f1)
+        local java_version
+        java_version=$(java -version 2>&1 | head -1 | cut -d'"' -f2 | sed 's/^1\.//' | cut -d'.' -f1)
         if [[ "$java_version" -ge 17 ]]; then
             success "Java $java_version is installed"
         else
@@ -143,7 +145,8 @@ check_prerequisites() {
 
     # Check Maven
     if command_exists mvn; then
-        local mvn_version=$(mvn --version | head -1 | awk '{print $3}')
+        local mvn_version
+        mvn_version=$(mvn --version | head -1 | awk '{print $3}')
         success "Maven $mvn_version is installed"
     else
         error "Maven is not installed. Please install Maven"
@@ -152,7 +155,8 @@ check_prerequisites() {
 
     # Check Node.js
     if command_exists node; then
-        local node_version=$(node --version | cut -d'v' -f2)
+        local node_version
+        node_version=$(node --version | cut -d'v' -f2)
         success "Node.js $node_version is installed"
     else
         error "Node.js is not installed. Please install Node.js"
@@ -161,7 +165,8 @@ check_prerequisites() {
 
     # Check npm
     if command_exists npm; then
-        local npm_version=$(npm --version)
+        local npm_version
+        npm_version=$(npm --version)
         success "npm $npm_version is installed"
     else
         error "npm is not installed. Please install npm"
@@ -436,7 +441,8 @@ EOF
     # Add backend test results
     for service in "${BACKEND_SERVICES[@]}"; do
         if [[ -d "$REPORTS_DIR/backend/$service" ]]; then
-            local test_count=$(find "$REPORTS_DIR/backend/$service" -name "TEST-*.xml" | wc -l)
+            local test_count
+            test_count=$(find "$REPORTS_DIR/backend/$service" -name "TEST-*.xml" | wc -l)
             echo "<li>$service: $test_count tests</li>" >> "$report_file"
         fi
     done
@@ -633,9 +639,12 @@ main() {
     # Calculate and display elapsed time
     local end_time
     end_time=$(date +%s)
-    local elapsed_time=$((end_time - start_time))
-    local minutes=$((elapsed_time / 60))
-    local seconds=$((elapsed_time % 60))
+    local elapsed_time
+    elapsed_time=$((end_time - start_time))
+    local minutes
+    minutes=$((elapsed_time / 60))
+    local seconds
+    seconds=$((elapsed_time % 60))
 
     section "Testing Completed"
     echo -e "${GREEN}All tests completed successfully!${NC}"

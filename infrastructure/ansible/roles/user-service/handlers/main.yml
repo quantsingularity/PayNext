@@ -1,19 +1,19 @@
 ---
 - name: Reload systemd
-  systemd:
-    daemon_reload: yes
+  ansible.builtin.systemd:
+    daemon_reload: true
 
 - name: Restart user-service
-  systemd:
+  ansible.builtin.systemd:
     name: user-service
     state: restarted
 
 - name: Notify dependent services of user-service restart
-  debug:
+  ansible.builtin.debug:
     msg: "User service has been restarted."
 
 - name: Wait for user-service to be available
-  uri:
+  ansible.builtin.uri:
     url: "http://{{ inventory_hostname }}:8000/actuator/health"
     status_code: 200
     method: GET

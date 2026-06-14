@@ -23,7 +23,7 @@ describe("Login Page", () => {
   test("renders login form with username field", () => {
     render(<MockLogin />);
     expect(screen.getByLabelText(/Username/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/Password/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/^Password/i)).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: /Sign In/i }),
     ).toBeInTheDocument();
@@ -65,7 +65,7 @@ describe("Login Page", () => {
 
   test("password visibility toggle works", () => {
     render(<MockLogin />);
-    const passwordField = screen.getByLabelText(/Password/i);
+    const passwordField = screen.getByLabelText(/^Password/i);
     expect(passwordField).toHaveAttribute("type", "password");
     const toggleButton = screen.getByRole("button", {
       name: /toggle password visibility/i,

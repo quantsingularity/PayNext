@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import { BrowserRouter } from "react-router-dom";
 import Navbar from "../Navbar";
 
@@ -20,8 +20,8 @@ describe("Navbar Component", () => {
 
   test("renders navigation links", () => {
     render(<MockNavbar />);
-    expect(screen.getByText("Pricing")).toBeInTheDocument();
-    expect(screen.getByText("Help")).toBeInTheDocument();
+    expect(screen.getAllByText("Pricing")[0]).toBeInTheDocument();
+    expect(screen.getAllByText("Help")[0]).toBeInTheDocument();
   });
 
   test("shows Login and Register buttons when not authenticated", () => {

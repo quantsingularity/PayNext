@@ -239,7 +239,8 @@ run_security_scan() {
 generate_validation_report() {
     log "Generating validation report..."
 
-    local report_file="/tmp/paynext-validation-report-$(date +%Y%m%d-%H%M%S).txt"
+    local report_file
+    report_file="/tmp/paynext-validation-report-$(date +%Y%m%d-%H%M%S).txt"
 
     cat > "$report_file" << EOF
 PayNext Infrastructure Validation Report

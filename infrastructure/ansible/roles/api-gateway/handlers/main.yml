@@ -1,5 +1,5 @@
 ---
 - name: restart api-gateway
-  systemd:
+  ansible.builtin.systemd:
     name: api-gateway
     state: restarted

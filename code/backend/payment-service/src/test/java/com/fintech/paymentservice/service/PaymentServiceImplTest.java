@@ -10,7 +10,11 @@ import com.fintech.paymentservice.client.UserClient;
 import com.fintech.paymentservice.dto.UserDTO;
 import com.fintech.paymentservice.model.NotificationRequest;
 import com.fintech.paymentservice.model.Payment;
+import com.fintech.paymentservice.model.PaymentMethod;
+import com.fintech.paymentservice.model.PaymentRequest;
+import com.fintech.paymentservice.repository.PaymentMethodRepository;
 import com.fintech.paymentservice.repository.PaymentRepository;
+import com.fintech.paymentservice.repository.PaymentRequestRepository;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Arrays;
@@ -28,6 +32,8 @@ import org.springframework.http.ResponseEntity;
 class PaymentServiceImplTest {
 
   @Mock private PaymentRepository paymentRepository;
+  @Mock private PaymentMethodRepository paymentMethodRepository;
+  @Mock private PaymentRequestRepository paymentRequestRepository;
   @Mock private NotificationClient notificationClient;
   @Mock private UserClient userClient;
 
@@ -146,5 +152,73 @@ class PaymentServiceImplTest {
     when(paymentRepository.findById(999L)).thenReturn(Optional.empty());
 
     assertNull(paymentService.getPaymentById(999L));
+  }
+
+  @Test
+  void getPaymentsByUserId_shouldReturnUserPayments() {
+    when(paymentRepository.findByUserId(100L)).thenReturn(Arrays.asList(testPayment));
+
+    List<Payment> result = paymentService.getPaymentsByUserId(100L);
+
+    assertEquals(1, result.size());
+    verify(paymentRepository).findByUserId(100L);
+  }
+
+  @Test
+  void getBalanceForUser_shouldSumPaymentAmounts() {
+    Payment second = new Payment();
+    second.setUserId(100L);
+    second.setAmount(new BigDecimal("200.00"));
+    when(paymentRepository.findByUserId(100L)).thenReturn(Arrays.asList(testPayment, second));
+
+    BigDecimal balance = paymentService.getBalanceForUser(100L);
+
+    assertEquals(0, new BigDecimal("300.00").compareTo(balance));
+  }
+
+  @Test
+  void getBalanceForUser_whenUserIdNull_shouldReturnZero() {
+    assertEquals(0, BigDecimal.ZERO.compareTo(paymentService.getBalanceForUser(null)));
+  }
+
+  @Test
+  void getPaymentMethods_shouldReturnUserMethods() {
+    PaymentMethod method = new PaymentMethod();
+    method.setUserId(100L);
+    method.setProvider("visa");
+    when(paymentMethodRepository.findByUserId(100L)).thenReturn(Arrays.asList(method));
+
+    List<PaymentMethod> result = paymentService.getPaymentMethods(100L);
+
+    assertEquals(1, result.size());
+    assertEquals("visa", result.get(0).getProvider());
+  }
+
+  @Test
+  void addPaymentMethod_shouldSetUserIdAndSave() {
+    when(paymentMethodRepository.save(any(PaymentMethod.class)))
+        .thenAnswer(inv -> inv.getArgument(0));
+    PaymentMethod method = new PaymentMethod();
+    method.setProvider("mastercard");
+
+    PaymentMethod saved = paymentService.addPaymentMethod(100L, method);
+
+    assertEquals(100L, saved.getUserId());
+    assertEquals("mastercard", saved.getProvider());
+    verify(paymentMethodRepository).save(method);
+  }
+
+  @Test
+  void createPaymentRequest_shouldSetUserIdAndDefaultStatus() {
+    when(paymentRequestRepository.save(any(PaymentRequest.class)))
+        .thenAnswer(inv -> inv.getArgument(0));
+    PaymentRequest request = new PaymentRequest();
+    request.setAmount(new BigDecimal("50.00"));
+
+    PaymentRequest saved = paymentService.createPaymentRequest(100L, request);
+
+    assertEquals(100L, saved.getUserId());
+    assertEquals("PENDING", saved.getStatus());
+    verify(paymentRequestRepository).save(request);
   }
 }

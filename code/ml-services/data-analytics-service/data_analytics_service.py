@@ -18,6 +18,7 @@ logger = logging.getLogger(__name__)
 
 # pandas >= 2.2 uses 'ME' for month-end; older versions use 'M'
 import pandas as _pd_version_check
+
 _PANDAS_MAJOR = int(_pd_version_check.__version__.split(".")[0])
 _PANDAS_MINOR = int(_pd_version_check.__version__.split(".")[1])
 _MONTH_END_ALIAS = "ME" if (_PANDAS_MAJOR, _PANDAS_MINOR) >= (2, 2) else "M"

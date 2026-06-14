@@ -1,5 +1,5 @@
 ---
 - name: restart eureka-server
-  systemd:
+  ansible.builtin.systemd:
     name: eureka-server
     state: restarted

@@ -1,9 +1,10 @@
 ---
 - name: Restart ssh
-  service:
+  ansible.builtin.service:
     name: ssh
     state: restarted
   listen: "restart ssh"
 - name: Reload systemd
-  command: systemctl daemon-reload
+  ansible.builtin.systemd:
+    daemon_reload: true
   listen: "reload systemd"

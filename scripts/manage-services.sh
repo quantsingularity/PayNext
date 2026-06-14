@@ -23,8 +23,6 @@ GREEN='\033[0;32m'
 BLUE='\033[0;34m'
 RED='\033[0;31m'
 YELLOW='\033[1;33m'
-PURPLE='\033[0;35m'
-CYAN='\033[0;36m'
 NC='\033[0m' # No Color
 
 # --------------------
@@ -346,20 +344,20 @@ main() {
     fi
 
     # Determine service type and execute command
-    if [[ " ${BACKEND_SERVICES[@]} " =~ " ${SERVICE} " ]]; then
+    if [[ " ${BACKEND_SERVICES[*]} " == *" ${SERVICE} "* ]]; then
         case "$COMMAND" in
             clean) clean_backend "$SERVICE" ;;
             build) build_backend "$SERVICE" ;;
             run) run_backend "$SERVICE" ;;
             *) log ERROR "Invalid command '$COMMAND' for backend service." && usage ;;
         esac
-    elif [[ " ${ML_SERVICES[@]} " =~ " ${SERVICE} " ]]; then
+    elif [[ " ${ML_SERVICES[*]} " == *" ${SERVICE} "* ]]; then
         case "$COMMAND" in
             build) build_ml_service "$SERVICE" ;;
             run) run_ml_service "$SERVICE" ;;
             *) log ERROR "Invalid command '$COMMAND' for ML service (only build and run supported)." && usage ;;
         esac
-    elif [[ " ${FRONTEND_SERVICES[@]} " =~ " ${SERVICE} " ]]; then
+    elif [[ " ${FRONTEND_SERVICES[*]} " == *" ${SERVICE} "* ]]; then
         case "$COMMAND" in
             clean) clean_frontend "$SERVICE" ;;
             build) build_frontend "$SERVICE" ;;

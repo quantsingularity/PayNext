@@ -244,8 +244,10 @@ const TransactionHistory = () => {
             <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
               <FilterListIcon color="action" />
               <FormControl size="small" sx={{ minWidth: 140 }}>
-                <InputLabel>Filter</InputLabel>
+                <InputLabel id="transaction-filter-label">Filter</InputLabel>
                 <Select
+                  labelId="transaction-filter-label"
+                  id="transaction-filter"
                   value={filter}
                   label="Filter"
                   onChange={(e) => setFilter(e.target.value)}

@@ -13,8 +13,8 @@ describe("App Component", () => {
 
   test("renders navbar", () => {
     render(<App />);
-    expect(screen.getByText("Pricing")).toBeInTheDocument();
-    expect(screen.getByText("Help")).toBeInTheDocument();
+    expect(screen.getAllByText("Pricing")[0]).toBeInTheDocument();
+    expect(screen.getAllByText("Help")[0]).toBeInTheDocument();
   });
 
   test("shows login/register when not authenticated", () => {

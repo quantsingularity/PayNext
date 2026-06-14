@@ -10,7 +10,6 @@ Trains three complementary models on historical transaction data:
 import argparse
 import logging
 import os
-import sys
 from typing import Any, List
 
 _SERVICE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -20,7 +19,7 @@ import joblib
 import numpy as np
 import pandas as pd
 from sklearn.ensemble import IsolationForest, RandomForestClassifier
-from sklearn.metrics import classification_report, confusion_matrix, roc_auc_score
+from sklearn.metrics import classification_report, roc_auc_score
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder, StandardScaler
 from tensorflow.keras.layers import Dense, Input
@@ -67,10 +66,7 @@ def _build_features(df: pd.DataFrame) -> pd.DataFrame:
     df["day_of_month"] = df["transaction_time"].dt.day
 
     df["time_since_last_txn"] = (
-        df.groupby("user_id")["transaction_time"]
-        .diff()
-        .dt.total_seconds()
-        .fillna(0)
+        df.groupby("user_id")["transaction_time"].diff().dt.total_seconds().fillna(0)
     )
 
     # Rolling window features: use groupby + rolling with on= parameter.
@@ -91,21 +87,23 @@ def _build_features(df: pd.DataFrame) -> pd.DataFrame:
             .values
         )
 
-    df["user_avg_txn_amount_24h"] = (
-        df.groupby("user_id", group_keys=False)
-        .apply(lambda g: pd.Series(_rolling_mean(g, "transaction_amount", "24h"), index=g.index))
+    df["user_avg_txn_amount_24h"] = df.groupby("user_id", group_keys=False).apply(
+        lambda g: pd.Series(
+            _rolling_mean(g, "transaction_amount", "24h"), index=g.index
+        )
     )
-    df["user_txn_count_24h"] = (
-        df.groupby("user_id", group_keys=False)
-        .apply(lambda g: pd.Series(_rolling_count(g, "transaction_amount", "24h"), index=g.index))
+    df["user_txn_count_24h"] = df.groupby("user_id", group_keys=False).apply(
+        lambda g: pd.Series(
+            _rolling_count(g, "transaction_amount", "24h"), index=g.index
+        )
     )
-    df["user_avg_txn_amount_7d"] = (
-        df.groupby("user_id", group_keys=False)
-        .apply(lambda g: pd.Series(_rolling_mean(g, "transaction_amount", "7D"), index=g.index))
+    df["user_avg_txn_amount_7d"] = df.groupby("user_id", group_keys=False).apply(
+        lambda g: pd.Series(_rolling_mean(g, "transaction_amount", "7D"), index=g.index)
     )
-    df["user_txn_count_7d"] = (
-        df.groupby("user_id", group_keys=False)
-        .apply(lambda g: pd.Series(_rolling_count(g, "transaction_amount", "7D"), index=g.index))
+    df["user_txn_count_7d"] = df.groupby("user_id", group_keys=False).apply(
+        lambda g: pd.Series(
+            _rolling_count(g, "transaction_amount", "7D"), index=g.index
+        )
     )
 
     df.fillna(0, inplace=True)
@@ -175,7 +173,9 @@ def train_fraud_model(data_path: Any = None) -> None:
     y_proba_if = -model_if.decision_function(X_test)
     logger.info("IF Report:\n%s", classification_report(y_test, y_pred_if))
     logger.info("IF ROC AUC: %.4f", roc_auc_score(y_test, y_proba_if))
-    joblib.dump(model_if, os.path.join(MODEL_DIR, "fraud_isolation_forest_model.joblib"))
+    joblib.dump(
+        model_if, os.path.join(MODEL_DIR, "fraud_isolation_forest_model.joblib")
+    )
 
     # 3. AutoEncoder
     logger.info("Training AutoEncoder ...")

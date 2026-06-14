@@ -149,8 +149,11 @@ class TestRecommendationSourceFixes(unittest.TestCase):
         )
         with open(src_path) as f:
             src = f.read()
-        self.assertIn("model_dir = base_dir", src)
-        self.assertNotIn('model_dir = os.path.join(base_dir, "..")', src)
+        # Artifacts must be anchored to the service directory via this file's own
+        # absolute path, never to an escaped parent directory or the CWD.
+        self.assertIn("os.path.dirname(os.path.abspath(__file__))", src)
+        self.assertIn("recommendation_kmeans_model.joblib", src)
+        self.assertNotIn('os.path.join(base_dir, "..")', src)
 
     def test_api_model_dir_fixed(self):
         src_path = os.path.join(
@@ -159,10 +162,11 @@ class TestRecommendationSourceFixes(unittest.TestCase):
         )
         with open(src_path) as f:
             src = f.read()
-        self.assertIn("model_dir = os.path.dirname(__file__)", src)
-        self.assertNotIn(
-            'model_dir = os.path.join(os.path.dirname(__file__), "..")', src
-        )
+        # API must load artifacts from the service directory via this file's own
+        # absolute path, never from an escaped parent directory or the CWD.
+        self.assertIn("os.path.dirname(os.path.abspath(__file__))", src)
+        self.assertIn("recommendation_kmeans_model.joblib", src)
+        self.assertNotIn('os.path.join(os.path.dirname(__file__), "..")', src)
 
 
 if __name__ == "__main__":

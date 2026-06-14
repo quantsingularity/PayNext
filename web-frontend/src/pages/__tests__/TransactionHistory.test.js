@@ -1,9 +1,10 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import { BrowserRouter } from "react-router-dom";
 import TransactionHistory from "../TransactionHistory";
+import { simulateApiCall } from "../../services/api";
 
 jest.mock("../../services/api", () => ({
-  simulateApiCall: jest.fn((data) => Promise.resolve({ data })),
+  simulateApiCall: jest.fn(),
 }));
 
 const MockTransactionHistory = () => (
@@ -15,6 +16,10 @@ const MockTransactionHistory = () => (
 describe("TransactionHistory Page", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    // CRA's Jest preset enables resetMocks, which clears any implementation set
+    // at mock-factory time before each test. Set it here so the resolved value
+    // is available when the component loads.
+    simulateApiCall.mockImplementation((data) => Promise.resolve({ data }));
   });
 
   test("renders page title", async () => {

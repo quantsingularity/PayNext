@@ -14,6 +14,7 @@ mvn clean package -DskipTests -B --no-transfer-progress
 echo ""
 echo "=== Build complete ==="
 echo "Artifacts:"
-for jar in $(find . -name "*.jar" -path "*/target/*.jar" ! -name "*sources*" ! -name "*javadoc*"); do
+find . -name "*.jar" -path "*/target/*.jar" ! -name "*sources*" ! -name "*javadoc*" -print0 \
+  | while IFS= read -r -d '' jar; do
   echo "  $jar"
 done

@@ -35,6 +35,8 @@ public class SecurityConfig {
             auth ->
                 auth.requestMatchers("/actuator/**")
                     .permitAll()
+                    .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html")
+                    .permitAll()
                     .anyRequest()
                     .authenticated())
         .sessionManagement(
@@ -68,6 +70,10 @@ public class SecurityConfig {
               new UsernamePasswordAuthenticationToken(username, null, new ArrayList<>());
           auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
           SecurityContextHolder.getContext().setAuthentication(auth);
+          Long userId = jwtUtil.getUserIdFromToken(token);
+          if (userId != null) {
+            request.setAttribute("userId", userId);
+          }
         }
       }
       filterChain.doFilter(request, response);

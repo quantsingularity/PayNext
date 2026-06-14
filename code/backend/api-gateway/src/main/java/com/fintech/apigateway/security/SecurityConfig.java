@@ -35,8 +35,8 @@ public class SecurityConfig {
                 exchange
                     .pathMatchers(
                         "/actuator/**",
-                        "/*/users/login",
-                        "/*/users/register",
+                        "/api/users/login",
+                        "/api/users/register",
                         "/public/**")
                     .permitAll()
                     .anyExchange()

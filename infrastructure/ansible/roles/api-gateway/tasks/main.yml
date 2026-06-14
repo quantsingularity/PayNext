@@ -1,6 +1,6 @@
 ---
 - name: Install API Gateway dependencies
-  apt:
+  ansible.builtin.apt:
     name: "{{ item }}"
     state: present
   loop:
@@ -8,35 +8,35 @@
     - unzip
   when: ansible_os_family == "Debian"
 - name: Create API Gateway directory
-  file:
+  ansible.builtin.file:
     path: /opt/api-gateway
     state: directory
     owner: root
     group: root
     mode: "0755"
 - name: Upload API Gateway JAR file
-  copy:
+  ansible.builtin.copy:
     src: files/api-gateway.jar
     dest: /opt/api-gateway/api-gateway.jar
     mode: "0755"
     owner: root
     group: root
 - name: Configure API Gateway
-  template:
+  ansible.builtin.template:
     src: api-gateway-config.j2
     dest: /opt/api-gateway/application.properties
     owner: root
     group: root
     mode: "0644"
 - name: Configure systemd service for API Gateway
-  template:
+  ansible.builtin.template:
     src: api-gateway.service.j2
     dest: /etc/systemd/system/api-gateway.service
     mode: "0644"
   notify:
     - restart api-gateway
 - name: Enable and start API Gateway service
-  systemd:
+  ansible.builtin.systemd:
     name: api-gateway
-    enabled: yes
+    enabled: true
     state: started

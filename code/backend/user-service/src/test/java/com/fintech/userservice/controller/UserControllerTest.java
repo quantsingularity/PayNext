@@ -4,9 +4,11 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -15,15 +17,20 @@ import com.fintech.common.util.JwtUtil;
 import com.fintech.userservice.config.RateLimitConfig;
 import com.fintech.userservice.filter.JwtAuthenticationFilter;
 import com.fintech.userservice.model.User;
+import com.fintech.userservice.model.UserProfile;
 import com.fintech.userservice.repository.OTPVerificationRepository;
+import com.fintech.userservice.repository.UserProfileRepository;
 import com.fintech.userservice.repository.UserRepository;
 import com.fintech.userservice.service.AuditService;
+import com.fintech.userservice.service.UserPrincipal;
 import com.fintech.userservice.service.UserService;
 import org.springframework.mail.javamail.JavaMailSender;
 import io.github.bucket4j.Bucket;
 import io.github.bucket4j.ConsumptionProbe;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +40,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -55,6 +63,7 @@ class UserControllerTest {
   @MockBean private UserService userService;
   @MockBean private AuthenticationManager authenticationManager;
   @MockBean private JwtUtil jwtUtil;
+  @MockBean private UserProfileRepository userProfileRepository;
 
   // ── SecurityConfig / JwtAuthenticationFilter dependencies ─────────────────
   @MockBean private UserDetailsService userDetailsService;
@@ -244,7 +253,8 @@ class UserControllerTest {
             mockUserDetails, null, mockUserDetails.getAuthorities());
 
     when(authenticationManager.authenticate(any())).thenReturn(auth);
-    when(jwtUtil.generateToken(any(UserDetails.class))).thenReturn("mock-jwt-token");
+    when(jwtUtil.generateToken(any(UserDetails.class), any())).thenReturn("mock-jwt-token");
+    when(userService.findByUsername("testuser")).thenReturn(testUser);
 
     mockMvc
         .perform(
@@ -253,7 +263,8 @@ class UserControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(toJson(loginBody("testuser", "Password1@"))))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.token").value("mock-jwt-token"));
+        .andExpect(jsonPath("$.token").value("mock-jwt-token"))
+        .andExpect(jsonPath("$.user.username").value("testuser"));
   }
 
   @Test
@@ -315,5 +326,70 @@ class UserControllerTest {
     mockMvc
         .perform(get("/users/1").contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isUnauthorized());
+  }
+
+  // ── Current user and profile tests ─────────────────────────────────────────
+
+  private UsernamePasswordAuthenticationToken principalAuth() {
+    UserPrincipal principal =
+        new UserPrincipal(
+            1L,
+            "testuser",
+            "encoded",
+            true,
+            Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER")));
+    return new UsernamePasswordAuthenticationToken(principal, null, principal.getAuthorities());
+  }
+
+  @Test
+  void getCurrentUser_whenAuthenticated_shouldReturnUser() throws Exception {
+    when(userService.findById(1L)).thenReturn(testUser);
+
+    mockMvc
+        .perform(get("/users/me").with(authentication(principalAuth())))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.id").value(1))
+        .andExpect(jsonPath("$.username").value("testuser"))
+        .andExpect(jsonPath("$.email").value("test@example.com"))
+        .andExpect(jsonPath("$.role").value("ROLE_USER"));
+  }
+
+  @Test
+  void getProfile_whenNoProfileExists_shouldReturnUserDerivedProfile() throws Exception {
+    when(userService.findById(1L)).thenReturn(testUser);
+    when(userProfileRepository.findByUser_Id(1L)).thenReturn(Optional.empty());
+
+    mockMvc
+        .perform(get("/users/profile").with(authentication(principalAuth())))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.username").value("testuser"))
+        .andExpect(jsonPath("$.name").value("testuser"))
+        .andExpect(jsonPath("$.email").value("test@example.com"));
+  }
+
+  @Test
+  void updateProfile_shouldUpsertAndReturnProfile() throws Exception {
+    when(userService.findById(1L)).thenReturn(testUser);
+    when(userProfileRepository.findByUser_Id(1L)).thenReturn(Optional.empty());
+    when(userProfileRepository.save(any(UserProfile.class)))
+        .thenAnswer(invocation -> invocation.getArgument(0));
+
+    Map<String, String> body = new HashMap<>();
+    body.put("name", "Jane Doe");
+    body.put("phone", "+1 555 0142");
+    body.put("city", "Lisbon");
+
+    mockMvc
+        .perform(
+            put("/users/profile")
+                .with(csrf())
+                .with(authentication(principalAuth()))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(body)))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.firstName").value("Jane"))
+        .andExpect(jsonPath("$.lastName").value("Doe"))
+        .andExpect(jsonPath("$.phoneNumber").value("+15550142"))
+        .andExpect(jsonPath("$.city").value("Lisbon"));
   }
 }

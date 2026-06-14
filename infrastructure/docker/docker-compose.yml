@@ -87,7 +87,7 @@ services:
     environment:
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-docker}
       SERVER_PORT: 8000
-      EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE: http://eureka-server:8001/eureka
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8001/eureka
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/user_service_db
       SPRING_DATASOURCE_USERNAME: paynext
       SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
@@ -121,7 +121,7 @@ services:
     environment:
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-docker}
       SERVER_PORT: 8003
-      EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE: http://eureka-server:8001/eureka
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8001/eureka
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/payment_service_db
       SPRING_DATASOURCE_USERNAME: paynext
       SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
@@ -156,7 +156,7 @@ services:
     environment:
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-docker}
       SERVER_PORT: 8004
-      EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE: http://eureka-server:8001/eureka
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8001/eureka
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/notification_service_db
       SPRING_DATASOURCE_USERNAME: paynext
       SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
@@ -186,7 +186,7 @@ services:
     environment:
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-docker}
       SERVER_PORT: 8002
-      EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE: http://eureka-server:8001/eureka
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8001/eureka
       JWT_SECRET: ${JWT_SECRET}
       SPRING_REDIS_HOST: redis
       SPRING_REDIS_PORT: 6379
