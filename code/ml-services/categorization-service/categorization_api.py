@@ -27,9 +27,7 @@ category_vectorizer = None
 async def lifespan(app: FastAPI):
     global category_model, category_vectorizer
     try:
-        category_model = joblib.load(
-            os.path.join(_SERVICE_DIR, "category_model.joblib")
-        )
+        category_model = joblib.load(os.path.join(_SERVICE_DIR, "category_model.joblib"))
         category_vectorizer = joblib.load(
             os.path.join(_SERVICE_DIR, "category_vectorizer.joblib")
         )

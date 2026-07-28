@@ -10,7 +10,7 @@ shopt -s globstar 2>/dev/null
 # ── prompt ────────────────────────────────────────────────────────────────────
 echo ""
 echo "Available directories:"
-ls -d */ 2>/dev/null
+ls -d -- */ 2>/dev/null
 echo ""
 read -rp "Enter directory to lint (or '.' for entire project): " TARGET
 

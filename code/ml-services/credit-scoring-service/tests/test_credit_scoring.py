@@ -126,7 +126,9 @@ class TestCreditScoringModelSourceCode(unittest.TestCase):
         # absolute path, never to an escaped parent directory or the CWD.
         self.assertIn("os.path.dirname(os.path.abspath(__file__))", src)
         self.assertIn("credit_scoring_model.joblib", src)
-        self.assertNotIn('os.path.join(os.path.dirname(__file__), "..")', src)
+        self.assertNotIn(
+            'os.path.join(os.path.dirname(__file__), "..")', src
+        )
 
     def test_api_loads_from_service_dir(self):
         with open(
@@ -140,7 +142,9 @@ class TestCreditScoringModelSourceCode(unittest.TestCase):
         # absolute path, never from an escaped parent directory or the CWD.
         self.assertIn("os.path.dirname(os.path.abspath(__file__))", src)
         self.assertIn("credit_scoring_model.joblib", src)
-        self.assertNotIn('os.path.join(os.path.dirname(__file__), "..")', src)
+        self.assertNotIn(
+            'os.path.join(os.path.dirname(__file__), "..")', src
+        )
 
 
 class TestCreditScoringAPILogic(unittest.TestCase):

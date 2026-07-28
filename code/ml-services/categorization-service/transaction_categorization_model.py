@@ -31,8 +31,7 @@ def train_categorization_model(data_path: str = _DEFAULT_DATA):
         logger.warning(
             "Categorization data CSV not found at %s — generating now.", data_path
         )
-        from transaction_categorization_data_generator import \
-            generate_categorization_data
+        from transaction_categorization_data_generator import generate_categorization_data
 
         df_gen = generate_categorization_data(num_transactions=50000)
         df_gen.to_csv(data_path, index=False)
@@ -46,9 +45,7 @@ def train_categorization_model(data_path: str = _DEFAULT_DATA):
     if missing:
         raise ValueError(f"Training data is missing columns: {missing}")
 
-    df["text_features"] = (
-        df["merchant"].astype(str) + " " + df["description"].astype(str)
-    )
+    df["text_features"] = df["merchant"].astype(str) + " " + df["description"].astype(str)
     X = df["text_features"]
     y = df["category"]
 
@@ -85,9 +82,7 @@ def train_categorization_model(data_path: str = _DEFAULT_DATA):
 
     model_path = os.path.join(_SERVICE_DIR, "category_model.joblib")
     joblib.dump(best_model, model_path)
-    logger.info(
-        f"Transaction categorization model (SVC) trained and saved to {model_path}"
-    )
+    logger.info(f"Transaction categorization model (SVC) trained and saved to {model_path}")
 
 
 if __name__ == "__main__":

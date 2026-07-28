@@ -1,5 +1,6 @@
 import logging
 import os
+import sys
 
 _SERVICE_DIR = os.path.dirname(os.path.abspath(__file__))
 _CHURN_DATA = os.path.join(_SERVICE_DIR, "synthetic_churn_data.csv")
@@ -7,8 +8,7 @@ _CHURN_DATA = os.path.join(_SERVICE_DIR, "synthetic_churn_data.csv")
 import joblib
 import lightgbm as lgb
 import pandas as pd
-from sklearn.metrics import (classification_report, confusion_matrix,
-                             roc_auc_score)
+from sklearn.metrics import classification_report, confusion_matrix, roc_auc_score
 from sklearn.model_selection import GridSearchCV, train_test_split
 from sklearn.preprocessing import StandardScaler
 
@@ -28,8 +28,7 @@ def train_churn_model(data_path: str = _CHURN_DATA):
     """
     if not os.path.isfile(data_path):
         logger.warning(
-            "Churn data CSV not found at %s — generating synthetic data first.",
-            data_path,
+            "Churn data CSV not found at %s — generating synthetic data first.", data_path
         )
         from churn_prediction_data_generator import generate_churn_data
 
@@ -68,12 +67,14 @@ def train_churn_model(data_path: str = _CHURN_DATA):
     )
 
     # Lag features (shift before fillna to keep the sentinel)
-    df["prev_transactions_per_month"] = df.groupby("user_id")[
-        "transactions_per_month"
-    ].shift(1)
-    df["prev_logins_per_month"] = df.groupby("user_id")["logins_per_month"].shift(1)
-    df["prev_feature_usage_score"] = df.groupby("user_id")["feature_usage_score"].shift(
-        1
+    df["prev_transactions_per_month"] = (
+        df.groupby("user_id")["transactions_per_month"].shift(1)
+    )
+    df["prev_logins_per_month"] = (
+        df.groupby("user_id")["logins_per_month"].shift(1)
+    )
+    df["prev_feature_usage_score"] = (
+        df.groupby("user_id")["feature_usage_score"].shift(1)
     )
 
     # Fill NaN introduced by rolling/shift BEFORE computing diffs

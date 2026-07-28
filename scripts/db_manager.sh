@@ -392,6 +392,7 @@ mongodb_backup() {
 
     # Compress the backup
     info "Compressing backup..."
+    # shellcheck disable=SC2086  # eval-built command with intentional inner quoting; paths are script-controlled
     execute "tar -czf \"$backup_file.tar.gz\" -C \"$backup_dir\" \"$(basename \"$backup_file\")\"" "Backup compressed: $backup_file.tar.gz"
 
     # Remove the uncompressed backup

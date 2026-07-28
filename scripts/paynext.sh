@@ -73,7 +73,7 @@ execute() {
         local exit_code=$?
         log ERROR "Command failed (Exit code: $exit_code): $cmd"
         log ERROR "Error Output:"
-        cat "$temp_file" | while IFS= read -r line; do log ERROR "  $line"; done
+        while IFS= read -r line; do log ERROR "  $line"; done < "$temp_file"
         rm -f "$temp_file"
         
         if [[ "$continue_on_error" != "true" ]]; then
@@ -255,8 +255,12 @@ start_service() {
         log SUCCESS "[$SERVICE] started successfully."
     else
         log ERROR "Failed to start [$SERVICE]. Check $LOG_FILE for details."
-        # Securely stop the service if health check fails
-        kill "$SERVICE_PID" || true
+        # Securely stop the service if health check fails. The PID was written to
+        # PID_FILE inside the subshell above, so read it back rather than relying on
+        # SERVICE_PID, which does not propagate out of the subshell.
+        if [[ -f "$PID_FILE" ]]; then
+            kill "$(cat "$PID_FILE")" 2>/dev/null || true
+        fi
         rm -f "$PID_FILE"
         exit 1
     fi

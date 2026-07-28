@@ -72,7 +72,7 @@ execute() {
         local exit_code=$?
         log ERROR "Command failed (Exit code: $exit_code): $cmd"
         log ERROR "Error Output:"
-        cat "$temp_file" | while IFS= read -r line; do log ERROR "  $line"; done
+        while IFS= read -r line; do log ERROR "  $line"; done < "$temp_file"
         rm -f "$temp_file"
         
         if [[ "$continue_on_error" != "true" ]]; then

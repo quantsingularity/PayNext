@@ -72,7 +72,7 @@ execute() {
         local exit_code=$?
         log ERROR "Command failed (Exit code: $exit_code): $cmd"
         log ERROR "Error Output:"
-        cat "$temp_file" | while IFS= read -r line; do log ERROR "  $line"; done
+        while IFS= read -r line; do log ERROR "  $line"; done < "$temp_file"
         rm -f "$temp_file"
         
         if [[ "$continue_on_error" != "true" ]]; then
@@ -154,12 +154,12 @@ run_spotless() {
         local pom_dir
         pom_dir=$(dirname "$pom")
         log INFO "Applying Spotless in $pom_dir..."
-        (
+        if ! (
             cd "$pom_dir" || exit 1
-            if ! execute "mvn spotless:apply" "Spotless applied successfully to $pom_dir" true; then
-                overall_status=1
-            fi
-        )
+            execute "mvn spotless:apply" "Spotless applied successfully to $pom_dir" true
+        ); then
+            overall_status=1
+        fi
     done
     
     if [ "$overall_status" -eq 0 ]; then

@@ -1,5 +1,6 @@
 import logging
 import os
+import sys
 from typing import Any
 
 _SERVICE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -73,9 +74,7 @@ def train_recommendation_model() -> Any:
 
     kmeans = KMeans(n_clusters=NUM_CLUSTERS, random_state=42, n_init=10)
     user_spending["cluster"] = kmeans.fit_predict(X_scaled)
-    joblib.dump(
-        kmeans, os.path.join(_SERVICE_DIR, "recommendation_kmeans_model.joblib")
-    )
+    joblib.dump(kmeans, os.path.join(_SERVICE_DIR, "recommendation_kmeans_model.joblib"))
     logger.info(f"KMeans model trained with {NUM_CLUSTERS} clusters and saved.")
 
     user_spending.to_csv(

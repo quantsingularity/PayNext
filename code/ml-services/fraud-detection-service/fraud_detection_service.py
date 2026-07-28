@@ -22,8 +22,7 @@ import joblib
 import kafka_producer
 import numpy as np
 import pandas as pd
-from models import (FraudStatus, RiskLevel, TransactionAnalysis,
-                    UserBehaviorProfile)
+from models import FraudStatus, RiskLevel, TransactionAnalysis, UserBehaviorProfile
 from sqlalchemy.orm import Session
 
 logger = logging.getLogger(__name__)
@@ -281,19 +280,11 @@ def _behavioral_score(user_id: str, req: Dict, db: Session) -> float:
                 score += 0.20
 
         cats = profile.get("frequent_categories") or []
-        if (
-            cats
-            and req.get("merchant_category")
-            and req["merchant_category"] not in cats
-        ):
+        if cats and req.get("merchant_category") and req["merchant_category"] not in cats:
             score += 0.20
 
         methods = profile.get("preferred_payment_methods") or []
-        if (
-            methods
-            and req.get("payment_method")
-            and req["payment_method"] not in methods
-        ):
+        if methods and req.get("payment_method") and req["payment_method"] not in methods:
             score += 0.15
 
         start_t = profile.get("typical_start_time")

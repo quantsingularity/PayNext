@@ -30,14 +30,14 @@ BACKEND = [
     ("GET", re.compile(r"^/users/me$")),
     ("GET", re.compile(r"^/users/profile$")),
     ("PUT", re.compile(r"^/users/profile$")),
-    ("GET", re.compile(r"^/users/\d+$")),  # GET /users/{id}, numeric id
+    ("GET", re.compile(r"^/users/\d+$")),            # GET /users/{id}, numeric id
     ("POST", re.compile(r"^/payments$")),
     ("GET", re.compile(r"^/payments$")),
     ("GET", re.compile(r"^/payments/balance$")),
     ("GET", re.compile(r"^/payments/methods$")),
     ("POST", re.compile(r"^/payments/methods$")),
     ("POST", re.compile(r"^/payments/requests$")),
-    ("GET", re.compile(r"^/payments/\d+$")),  # GET /payments/{id}, numeric id
+    ("GET", re.compile(r"^/payments/\d+$")),          # GET /payments/{id}, numeric id
     ("POST", re.compile(r"^/notifications/send$")),
 ]
 
@@ -55,11 +55,7 @@ CALLS = [
     ("web", "GET", "/api/users/me"),
     ("web", "GET", "/api/users/profile"),
     ("web", "PUT", "/api/users/profile"),
-    (
-        "web",
-        "GET",
-        "/api/payments",
-    ),  # getTransactionHistory now reads from payment-service
+    ("web", "GET", "/api/payments"),  # getTransactionHistory now reads from payment-service
     ("web", "POST", "/api/payments"),
     ("web", "GET", "/api/payments"),
     ("web", "GET", "/api/payments/123"),
