@@ -238,8 +238,8 @@ When adding features, update:
 
 \`\`\`bash
 curl -X POST http://localhost:8002/api/new-endpoint \
- -H "Authorization: Bearer $TOKEN" \
- -d '{"param1": "value"}'
+-H "Authorization: Bearer $TOKEN" \
+-d '{"param1": "value"}'
 \`\`\`
 ```
 
