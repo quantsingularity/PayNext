@@ -135,9 +135,7 @@ class TestChurnFeatureEngineering(unittest.TestCase):
         # absolute path, never to an escaped parent directory or the CWD.
         self.assertIn("os.path.dirname(os.path.abspath(__file__))", src)
         self.assertIn("churn_model.joblib", src)
-        self.assertNotIn(
-            'os.path.join(os.path.dirname(__file__), "..")', src
-        )
+        self.assertNotIn('os.path.join(os.path.dirname(__file__), "..")', src)
 
 
 class TestChurnAPILogic(unittest.TestCase):
@@ -163,9 +161,7 @@ class TestChurnAPILogic(unittest.TestCase):
         # absolute path, never from an escaped parent directory or the CWD.
         self.assertIn("os.path.dirname(os.path.abspath(__file__))", src)
         self.assertIn("churn_model.joblib", src)
-        self.assertNotIn(
-            'os.path.join(os.path.dirname(__file__), "..")', src
-        )
+        self.assertNotIn('os.path.join(os.path.dirname(__file__), "..")', src)
 
 
 if __name__ == "__main__":

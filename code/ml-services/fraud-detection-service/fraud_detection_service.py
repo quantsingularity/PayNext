@@ -280,11 +280,19 @@ def _behavioral_score(user_id: str, req: Dict, db: Session) -> float:
                 score += 0.20
 
         cats = profile.get("frequent_categories") or []
-        if cats and req.get("merchant_category") and req["merchant_category"] not in cats:
+        if (
+            cats
+            and req.get("merchant_category")
+            and req["merchant_category"] not in cats
+        ):
             score += 0.20
 
         methods = profile.get("preferred_payment_methods") or []
-        if methods and req.get("payment_method") and req["payment_method"] not in methods:
+        if (
+            methods
+            and req.get("payment_method")
+            and req["payment_method"] not in methods
+        ):
             score += 0.15
 
         start_t = profile.get("typical_start_time")

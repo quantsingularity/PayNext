@@ -83,7 +83,9 @@ def main() -> int:
     for name, directory, script, marker in SERVICES:
         script_path = os.path.join(BASE, directory, script)
         if not os.path.isfile(script_path):
-            logger.warning("Skipping %s — training script not found: %s", name, script_path)
+            logger.warning(
+                "Skipping %s — training script not found: %s", name, script_path
+            )
             continue
 
         marker_path = os.path.join(BASE, directory, marker)
