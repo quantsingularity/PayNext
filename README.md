@@ -1,266 +1,261 @@
 # PayNext
 
-![CI/CD Status](https://img.shields.io/github/actions/workflow/status/quantsingularity/PayNext/cicd.yml?branch=main&label=CI/CD&logo=github)
-[![Test Coverage](https://img.shields.io/badge/coverage-87%25-brightgreen)](https://github.com/quantsingularity/PayNext/actions)
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+![CI/CD Status](https://img.shields.io/github/actions/workflow/status/quantsingularity/PayNext/cicd.yml?branch=main&label=CI%2FCD&logo=github)
 
 ## Digital Payment Platform
 
-PayNext is a robust, scalable payment processing platform built on a microservices architecture. It provides secure, fast, and reliable payment solutions for businesses of all sizes, with support for multiple payment methods and currencies.
+PayNext is a payment processing platform built as genuine Java microservices: a Eureka service registry, a Spring Cloud Gateway, and independent user, payment, and notification services, all on Spring Boot 3.2 and Java 17. Alongside it, a separate set of 7 Python/FastAPI machine learning services (fraud detection, credit scoring, anomaly detection, churn prediction, transaction categorization, recommendations, and analytics) run as their own containers, though the gateway doesn't route to any of them yet, so they're reachable directly on their own ports rather than through the unified `/api` surface.
 
 <div align="center">
-  <img src="docs/images/homepage.bmp" alt="PayNext HomePage" width="80%">
+  <img src="docs/images/homepage.bmp" alt="PayNext HomePage" width="100%">
 </div>
-
-## Executive Summary
-
-PayNext is a robust, scalable payment processing platform built on a **microservices architecture**. It provides secure, fast, and reliable payment solutions for businesses of all sizes, with comprehensive support for multiple payment methods and currencies. The platform is designed for high availability and maintainability, leveraging modern cloud-native technologies to ensure compliance and seamless transaction handling.
-
----
 
 ## Table of Contents
 
 - [Overview](#overview)
 - [Project Structure](#project-structure)
-- [Key Features](#key-features)
-- [Architecture](#architecture)
+- [Feature Status](#feature-status)
 - [Technology Stack](#technology-stack)
-- [Services](#services)
-- [Getting Started](#getting-started)
-- [API Endpoints](#api-endpoints)
+- [Architecture](#architecture)
+- [Installation and Setup](#installation-and-setup)
+- [Running the Stack](#running-the-stack)
+- [API Surface](#api-surface)
 - [Testing](#testing)
 - [CI/CD Pipeline](#cicd-pipeline)
 - [Documentation](#documentation)
 - [Contributing](#contributing)
 - [License](#license)
 
----
-
 ## Overview
 
-PayNext is a comprehensive payment processing platform designed with a microservices architecture to ensure scalability, resilience, and maintainability. The system handles various payment methods, provides robust security features, and offers a seamless user experience for both merchants and customers. Its modular design allows for independent development and deployment of services, making it adaptable to evolving payment industry standards and business needs.
-
----
+PayNext demonstrates a payment platform across a real, runnable set of Java microservices, backed by real integration and unit tests. Its API Gateway has explicit, documented routes for exactly three services: user, payment, and notification. The seven ML services are substantial and independently tested (fraud detection alone combines Isolation Forest, Random Forest, and a Keras autoencoder, publishing results to Kafka), but they're a separate, unrouted tier: none of the Java services call them, and the gateway doesn't expose them under `/api`.
 
 ## Project Structure
 
-The project is organized into several main components:
-
 ```
 PayNext/
-├── backend/                # Core backend logic, services, and shared utilities
-├── docs/                   # Project documentation
-├── infrastructure/         # DevOps, deployment, and infra-related code
-├── mobile-frontend/        # Mobile application
-├── web-frontend/           # Web dashboard
-├── scripts/                # Automation, setup, and utility scripts
-├── LICENSE                 # License information
-└── README.md               # Project overview and instructions
+├── code/
+│   ├── backend/                           # Java microservices (Maven multi-module)
+│   │   ├── eureka-server/                 # Service registry
+│   │   ├── api-gateway/                   # Spring Cloud Gateway, explicit routes for
+│   │   │                                  # user/payment/notification under /api
+│   │   ├── user-service/                  # Registration, login, profile
+│   │   ├── payment-service/               # Payments, payment methods, balance
+│   │   ├── notification-service/          # Sending notifications
+│   │   └── common-module/                 # Shared library
+│   ├── ml-services/                       # 7 independent Python/FastAPI services
+│   │   ├── fraud-detection-service/       # Isolation Forest + Random Forest +
+│   │   │                                  # Keras autoencoder, Kafka producer
+│   │   ├── credit-scoring-service/
+│   │   ├── anomaly-detection-service/
+│   │   ├── churn-prediction-service/
+│   │   ├── categorization-service/
+│   │   ├── recommendation-service/
+│   │   └── data-analytics-service/
+│   └── docker-compose.yml                 # Full local stack: MySQL, Redis, Kafka,
+│                                          # Zookeeper, all Java and ML services
+├── web-frontend/                          # React (Create React App) dashboard
+├── mobile-frontend/                       # React Native (Expo Router) app
+├── infrastructure/                        # Docker, Kubernetes (with a real Helm chart),
+│                                          # Terraform (AWS), Ansible, monitoring
+├── scripts/                               # paynext.sh (build/start/stop/list backend
+│                                          # services) and other setup/deploy scripts
+├── docs/                                  # Documentation (this directory)
+└── README.md
 ```
 
-## Key Features
+## Feature Status
 
-PayNext's features are structured across four critical areas of a modern payment platform, ensuring a secure, flexible, and fully managed service.
+### Application tier (wired and tested)
 
-### Payment Processing
+| Component                        | Details                                                                                                                                                                                                                                                                                                                                                            |
+| :------------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Service registry and gateway** | A real Eureka server, with a Spring Cloud Gateway that rewrites `/api/users/**`, `/api/payments/**`, and `/api/notifications/**` to their respective services via Eureka's load balancer.                                                                                                                                                                          |
+| **User service**                 | Registration, login, JWT issuance, and profile management (`/users/register`, `/users/login`, `/users/me`, `/users/profile`).                                                                                                                                                                                                                                      |
+| **Payment service**              | Initiating payments, listing payment methods, adding a payment method, checking balance, and payment requests (`/payments`, `/payments/methods`, `/payments/balance`, `/payments/requests`). It calls the user service directly (via a Feign-style client) rather than through a separate transaction service; there is no transaction service in this repository. |
+| **Notification service**         | Sending a notification (`/notifications/send`).                                                                                                                                                                                                                                                                                                                    |
+| **Auth**                         | JWT sessions issued by the user service. The signing key falls back to a placeholder value that's explicitly named to indicate it's for development only, if `JWT_SECRET` isn't set.                                                                                                                                                                               |
+| **Resilience**                   | Circuit breaker configuration (Resilience4j) on the payment service's calls to the user service.                                                                                                                                                                                                                                                                   |
+| **Web dashboard**                | React app (plain JavaScript, Create React App) with Material-UI and Framer Motion, covering the core payment, dashboard, and authentication screens.                                                                                                                                                                                                               |
+| **Mobile app**                   | React Native (Expo Router, TypeScript) app with a barcode scanner and camera integration, using React Context (not Redux) for auth state.                                                                                                                                                                                                                          |
 
-The platform offers extensive payment functionality, including support for **Multiple Payment Methods** such as credit/debit cards, bank transfers, and digital wallets. It is equipped for **International Payments** with multi-currency support and automatic conversion. For subscription-based models, PayNext handles **Recurring Payments**, and it also facilitates complex transactions through **Split Payments** among multiple recipients. Merchants can also generate **Payment Links** for shareable and easy collection.
+### ML services tier (real, independently deployed, not routed through the gateway)
 
-### Security
+| Component                      | Details                                                                                                                                                       |
+| :----------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Fraud detection**            | Isolation Forest, Random Forest, and a Keras autoencoder, with its own database access, a cache layer, and a Kafka producer for publishing detection results. |
+| **Credit scoring**             | A dedicated FastAPI service with its own model and API.                                                                                                       |
+| **Anomaly detection**          | Includes its own synthetic data generator for training.                                                                                                       |
+| **Churn prediction**           | Includes its own synthetic data generator for training.                                                                                                       |
+| **Transaction categorization** | Includes its own synthetic data generator for training.                                                                                                       |
+| **Recommendation service**     | A dedicated FastAPI service with its own model and API.                                                                                                       |
+| **Data analytics**             | A dedicated FastAPI service for analytics queries.                                                                                                            |
 
-Security is foundational to PayNext. The platform is designed for **PCI DSS Compliance**, adhering to the Payment Card Industry Data Security Standards. It employs **AI-powered Fraud Detection** and prevention mechanisms to protect transactions. Sensitive payment information is protected through **Tokenization**, and user accounts benefit from enhanced security via **Two-Factor Authentication**. All data in transit and at rest is secured through **End-to-end Encryption**.
-
-### User Management
-
-PayNext provides comprehensive tools for managing both merchants and customers. The system offers a **Streamlined Merchant Onboarding** process and secure storage for **Customer Profiles** and payment preferences. Access within the platform is governed by **Role-Based Access Control** (RBAC), ensuring granular permissions for different user types. Merchants also have access to **Account Management** tools for self-service maintenance.
-
-### Reporting & Analytics
-
-The platform delivers deep insights into payment activities. Merchants receive **Detailed Transaction Reports** and tools for **Financial Reconciliation** to balance accounts. An integrated **Analytics Dashboard** provides business intelligence and performance metrics. Data can be exported in various formats (CSV, PDF, Excel) via **Export Capabilities**, and users can configure specific data views using **Custom Reports**.
-
----
-
-## Architecture
-
-PayNext follows a microservices architecture, leveraging Spring Cloud components for robust service management and communication.
-
-### Architectural Components
-
-The system is composed of the following key components:
-
-| Component            | Primary Function                                                                             |
-| :------------------- | :------------------------------------------------------------------------------------------- |
-| **API Gateway**      | Routes client requests, handles authentication, rate limiting, and circuit breaking.         |
-| **Service Registry** | Manages service discovery, allowing services to find and communicate with each other.        |
-| **Config Server**    | Centralizes configuration management for all microservices.                                  |
-| **Core Services**    | User, Payment, Transaction, Notification, and Reporting services handle core business logic. |
-| **Frontend**         | Web Dashboard and Mobile App provide user interfaces.                                        |
-| **Infrastructure**   | Database Cluster, Message Queue (RabbitMQ/Kafka), Cache Layer (Redis), and Monitoring Stack. |
-
-### Request Flow
-
-1.  Client requests are received by the **API Gateway**.
-2.  The Gateway routes requests to the appropriate microservices, utilizing the **Service Registry** for location.
-3.  Services communicate with each other via REST APIs or the **Message Queue** for asynchronous processing.
-4.  The **Config Server** provides dynamic configuration updates to all running services.
-
----
+Each of these runs as its own container in Docker Compose, on its own port, with a real FastAPI app and its own two-file test suite. None of the Java services currently call any of them.
 
 ## Technology Stack
 
-PayNext is built using a modern, enterprise-grade technology stack, primarily leveraging the Spring ecosystem.
+| Area              | Technology                                                                              |
+| :---------------- | :-------------------------------------------------------------------------------------- |
+| Backend services  | Java 17, Spring Boot 3.2.0, Spring Cloud 2023.0.0, Maven (multi-module)                 |
+| Service discovery | Netflix Eureka                                                                          |
+| API Gateway       | Spring Cloud Gateway                                                                    |
+| Resilience        | Resilience4j (circuit breakers)                                                         |
+| Auth              | JJWT (JSON Web Tokens)                                                                  |
+| Data layer        | MySQL, Redis                                                                            |
+| Messaging         | Kafka (used by the fraud-detection service; no other service publishes to it)           |
+| ML services       | Python, FastAPI, scikit-learn (Isolation Forest, Random Forest), TensorFlow/Keras       |
+| API docs          | springdoc-openapi (Swagger UI on the gateway)                                           |
+| Web frontend      | React 18, JavaScript, Create React App, Material-UI, Framer Motion, axios               |
+| Mobile frontend   | React Native, Expo Router, TypeScript, React Context                                    |
+| Infrastructure    | Docker, Docker Compose, Kubernetes (with a Helm chart), Terraform (AWS), Ansible        |
+| CI/CD             | GitHub Actions                                                                          |
+| Testing           | JUnit and Spring Boot Test (Java services), pytest (ML services), Jest (web and mobile) |
 
-### Core Technologies
+## Architecture
 
-| Category              | Key Technologies                                        | Description                                                                                   |
-| :-------------------- | :------------------------------------------------------ | :-------------------------------------------------------------------------------------------- |
-| **Backend**           | Spring Boot, Spring Cloud, Java 17                      | Robust framework for microservices development, utilizing Java for performance and stability. |
-| **Databases**         | MySQL, MongoDB                                          | MySQL for transactional data; MongoDB for flexible data storage.                              |
-| **Messaging**         | RabbitMQ, Kafka                                         | Message queues for reliable asynchronous communication and event streaming.                   |
-| **Cache & Discovery** | Redis, Netflix Eureka                                   | Redis for fast caching; Eureka for dynamic service discovery.                                 |
-| **API Gateway**       | Spring Cloud Gateway                                    | High-performance, reactive API gateway.                                                       |
-| **Web Frontend**      | React, TypeScript, Redux Toolkit, Material-UI, Recharts | Modern stack for a responsive web dashboard with advanced data visualization.                 |
-| **Mobile Frontend**   | React Native, Redux Toolkit                             | Cross-platform framework for native mobile application development.                           |
+```
+Clients
+  ├── web-frontend (React)               ── HTTP/JSON ──┐
+  └── mobile-frontend (React Native)     ── HTTP/JSON ──┤
+                                                        ▼
+API Gateway (Spring Cloud Gateway)
+  /api/users/**          -> user-service
+  /api/payments/**       -> payment-service
+  /api/notifications/**  -> notification-service
+  (routes resolved via Eureka; ML services are not routed here)
 
-### Infrastructure & DevOps
+Java microservices (Spring Boot, registered with Eureka)
+  user-service · payment-service (calls user-service) · notification-service
+  Data layer: MySQL, Redis
 
-| Category             | Key Technologies               | Description                                                            |
-| :------------------- | :----------------------------- | :--------------------------------------------------------------------- |
-| **Containerization** | Docker, Kubernetes             | Docker for containerization; Kubernetes for orchestration and scaling. |
-| **CI/CD**            | GitHub Actions                 | Automated continuous integration and deployment pipelines.             |
-| **Observability**    | Prometheus, Grafana, ELK Stack | Comprehensive monitoring, alerting, and centralized logging.           |
-| **IaC**              | Terraform, Helm                | Infrastructure as Code for provisioning and managing cloud resources.  |
+ML services (Python / FastAPI, independent containers, called directly by port)
+  fraud-detection-service (publishes to Kafka) · credit-scoring-service
+  anomaly-detection-service · churn-prediction-service · categorization-service
+  recommendation-service · data-analytics-service
+```
 
----
+See [docs/architecture.md](docs/architecture.md) for detail.
 
-## Services
+## Installation and Setup
 
-The platform is composed of dedicated microservices, each handling a specific domain:
+Prerequisites: Java 17 and Maven, Node.js and npm, Python 3.11+, and Docker.
 
-| Service                  | Responsibilities                                                                                      |
-| :----------------------- | :---------------------------------------------------------------------------------------------------- |
-| **API Gateway**          | Request routing, authentication, rate limiting, circuit breaking, and Swagger documentation.          |
-| **User Service**         | User registration, authentication, profile management, and role-based access control.                 |
-| **Payment Service**      | Processing transactions, integrating payment gateways, and managing payment methods.                  |
-| **Transaction Service**  | Recording transaction history, tracking status, handling refunds/chargebacks, and reconciliation.     |
-| **Notification Service** | Sending transaction alerts via email, SMS, and push; managing notification preferences and templates. |
-| **Reporting Service**    | Generating financial and transaction reports, providing analytics, and handling data export.          |
+```bash
+git clone https://github.com/quantsingularity/PayNext.git
+cd PayNext
 
----
+# Java backend
+cd code/backend
+mvn clean install
+cd ../..
 
-## Getting Started
+# ML services (each has its own requirements.txt)
+for svc in code/ml-services/*/; do
+  if [ -f "${svc}requirements.txt" ]; then
+    pip install -r "${svc}requirements.txt"
+  fi
+done
 
-### Prerequisites
+# Web frontend
+cd web-frontend && npm install && cd ..
 
-To set up the platform, ensure you have the following installed:
+# Mobile frontend
+cd mobile-frontend && npm install && cd ..
+```
 
-- **Java 17** and **Maven**
-- **Node.js** and **npm**
-- **Docker** and Docker Compose
-- **Kubernetes** (for production deployment)
+Full, environment-specific instructions are in [docs/INSTALLATION.md](docs/INSTALLATION.md).
 
-### Local Development Setup
+## Running the Stack
 
-Follow these steps to set up the local development environment:
+```bash
+# Full local stack, including MySQL, Redis, Kafka, Zookeeper, and every
+# Java and ML service (from code/, Docker required)
+cd code
+docker compose up -d
 
-| Step                        | Command                                                                   | Description                                                          |
-| :-------------------------- | :------------------------------------------------------------------------ | :------------------------------------------------------------------- |
-| **1. Clone Repository**     | `git clone https://github.com/quantsingularity/PayNext.git && cd PayNext` | Download the source code and navigate to the project directory.      |
-| **2. Start Infrastructure** | `docker-compose up -d mysql rabbitmq redis`                               | Start core infrastructure services (database, message queue, cache). |
-| **3. Build & Run Backend**  | `./paynext.sh build-run-backend`                                          | Build and start all Spring Boot microservices.                       |
-| **4. Run Frontend**         | `cd web-frontend && npm install && npm start`                             | Install dependencies and start the web dashboard.                    |
+# Or run the Java services individually with the project script (from repo root)
+./scripts/paynext.sh build
+./scripts/paynext.sh start        # or: ./scripts/paynext.sh start payment-service
+./scripts/paynext.sh list         # PIDs and status
 
-**Access Points:**
+# Web dashboard (from web-frontend)
+npm start                          # http://localhost:3000
 
-- **Web Dashboard**: `http://localhost:3000`
-- **API Gateway**: `http://localhost:8080`
-- **Swagger UI**: `http://localhost:8080/swagger-ui.html`
+# Mobile app (from mobile-frontend)
+npm start                          # press w for web, a for Android, i for iOS
+```
 
----
+**Access points:** Web dashboard at `http://localhost:3000`, API Gateway at `http://localhost:8080`, Swagger UI at `http://localhost:8080/swagger-ui.html`.
 
-## API Endpoints
+See [docs/USAGE.md](docs/USAGE.md) and [docs/CONFIGURATION.md](docs/CONFIGURATION.md).
 
-The API Gateway provides a unified entry point for accessing the various service APIs.
+## API Surface
 
-| Service         | Endpoint                        | Method | Description                         |
-| :-------------- | :------------------------------ | :----- | :---------------------------------- |
-| **User**        | `/api/users/register`           | `POST` | Register a new user.                |
-| **Payment**     | `/api/payments`                 | `POST` | Initiate a new payment.             |
-| **Payment**     | `/api/payments/history`         | `GET`  | Retrieve payment history.           |
-| **Transaction** | `/api/transactions`             | `GET`  | List transactions.                  |
-| **Transaction** | `/api/transactions/{id}/refund` | `POST` | Process a refund for a transaction. |
+Through the gateway, base URL `http://localhost:8080/api`. The ML services aren't behind the gateway; reach them on their own ports directly.
 
----
+| Group         | Prefix               | Highlights                                                            |
+| :------------ | :------------------- | :-------------------------------------------------------------------- |
+| Users         | `/api/users`         | `register`, `login`, `me`, `profile` (get and update), `{id}`         |
+| Payments      | `/api/payments`      | create, list, `balance`, `methods` (list and add), `requests`, `{id}` |
+| Notifications | `/api/notifications` | `send`                                                                |
+
+Full request and response shapes are in [docs/API.md](docs/API.md).
 
 ## Testing
 
-The project maintains an overall test coverage of **87%** across all components, ensuring reliability and security in all payment operations.
+```bash
+# Java services (from code/backend)
+mvn test
 
-### Test Coverage Summary
+# A single ML service (from its own directory under code/ml-services)
+pytest
 
-| Component               | Coverage | Status |
-| :---------------------- | :------- | :----- |
-| **Payment Service**     | 92%      | ✅     |
-| **User Service**        | 90%      | ✅     |
-| **Transaction Service** | 88%      | ✅     |
-| **API Gateway**         | 85%      | ✅     |
-| **Web Frontend**        | 85%      | ✅     |
-| **Mobile Frontend**     | 80%      | ✅     |
+# Web (from web-frontend)
+npm test
 
-### Testing Types
+# Mobile (from mobile-frontend)
+npm test
 
-The comprehensive testing strategy includes:
+# Everything, via the project script (from repo root)
+./scripts/run_all_tests.sh
+```
 
-- **Backend Tests**: Unit tests for service and repository layers, integration tests for API endpoints, contract tests for service interactions, and performance tests for critical operations.
-- **Frontend Tests**: Component tests with React Testing Library, integration tests with Cypress, end-to-end tests for critical user flows, and snapshot tests for UI components.
-
-**Running Tests:** All tests can be run using the convenience script `./run-all-tests.sh` from the root directory, or individually for backend (`./mvnw test`) and frontend (`npm test`).
-
----
+Each Java service has its own JUnit test suite (2 files for api-gateway, notification-service, payment-service, and user-service; 1 file each for eureka-server and common-module). Each of the 7 ML services has its own 2-file pytest suite. The web dashboard has 15 test files; the mobile app has 2.
 
 ## CI/CD Pipeline
 
-PayNext uses GitHub Actions for continuous integration and deployment:
+GitHub Actions (`.github/workflows/cicd.yml`) runs four jobs on push, pull request, and manual dispatch:
 
-| Stage                | Control Area                    | Institutional-Grade Detail                                                              |
-| :------------------- | :------------------------------ | :-------------------------------------------------------------------------------------- |
-| **Formatting Check** | Change Triggers                 | Enforced on all `push` and `pull_request` events to `main` and `develop`                |
-|                      | Manual Oversight                | On-demand execution via controlled `workflow_dispatch`                                  |
-|                      | Source Integrity                | Full repository checkout with complete Git history for auditability                     |
-|                      | Python Runtime Standardization  | Python 3.10 with deterministic dependency caching                                       |
-|                      | Backend Code Hygiene            | `autoflake` to detect unused imports/variables using non-mutating diff-based validation |
-|                      | Backend Style Compliance        | `black --check` to enforce institutional formatting standards                           |
-|                      | Non-Intrusive Validation        | Temporary workspace comparison to prevent unauthorized source modification              |
-|                      | Node.js Runtime Control         | Node.js 18 with locked dependency installation via `npm ci`                             |
-|                      | Web Frontend Formatting Control | Prettier checks for web-facing assets                                                   |
-|                      | Mobile Frontend Formatting      | Prettier enforcement for mobile application codebases                                   |
-|                      | Documentation Governance        | Repository-wide Markdown formatting enforcement                                         |
-|                      | Infrastructure Configuration    | Prettier validation for YAML/YML infrastructure definitions                             |
-|                      | Compliance Gate                 | Any formatting deviation fails the pipeline and blocks merge                            |
+| Job                 | Depends on          | What it does                                                              |
+| :------------------ | :------------------ | :------------------------------------------------------------------------ |
+| Code Quality Checks | -                   | Formatter checks across the repository                                    |
+| Backend Build       | Code Quality Checks | `mvn clean install -DskipTests` and uploads the built JARs as an artifact |
+| Backend Tests       | Backend Build       | `mvn test` and publishes a JUnit test report                              |
+| Web Build           | Code Quality Checks | Builds the web frontend and uploads the build artifact (no test step)     |
 
----
+There is currently no CI job for the ML services or the mobile app.
 
 ## Documentation
 
-| Document                    | Path                 | Description                                                    |
-| :-------------------------- | :------------------- | :------------------------------------------------------------- |
-| **README**                  | `README.md`          | High-level overview, project scope, and repository entry point |
-| **Installation Guide**      | `INSTALLATION.md`    | Step-by-step installation and environment setup                |
-| **API Reference**           | `API.md`             | Detailed documentation for all API endpoints                   |
-| **CLI Reference**           | `CLI.md`             | Command-line interface usage, commands, and examples           |
-| **User Guide**              | `USAGE.md`           | Comprehensive end-user guide, workflows, and examples          |
-| **Architecture Overview**   | `ARCHITECTURE.md`    | System architecture, components, and design rationale          |
-| **Configuration Guide**     | `CONFIGURATION.md`   | Configuration options, environment variables, and tuning       |
-| **Feature Matrix**          | `FEATURE_MATRIX.md`  | Feature coverage, capabilities, and roadmap alignment          |
-| **Contributing Guidelines** | `CONTRIBUTING.md`    | Contribution workflow, coding standards, and PR requirements   |
-| **Troubleshooting**         | `TROUBLESHOOTING.md` | Common issues, diagnostics, and remediation steps              |
+| Document                                           | Contents                               |
+| :------------------------------------------------- | :------------------------------------- |
+| [docs/README.md](docs/README.md)                   | Documentation index                    |
+| [docs/architecture.md](docs/architecture.md)       | System architecture                    |
+| [docs/API.md](docs/API.md)                         | REST API reference                     |
+| [docs/INSTALLATION.md](docs/INSTALLATION.md)       | Setup for all components               |
+| [docs/CONFIGURATION.md](docs/CONFIGURATION.md)     | Environment variables and config       |
+| [docs/USAGE.md](docs/USAGE.md)                     | Running and using the platform         |
+| [docs/CLI.md](docs/CLI.md)                         | Helper scripts reference               |
+| [docs/FEATURE_MATRIX.md](docs/FEATURE_MATRIX.md)   | Feature status, implemented vs planned |
+| [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md) | Common issues and fixes                |
+| [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md)       | Contribution guide                     |
+| [docs/examples/](docs/examples/)                   | Worked examples                        |
 
 ## Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request. The process involves forking the repository, creating a feature branch, committing your changes, and opening a Pull Request for review.
-
----
+See [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md).
 
 ## License
 
-This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
